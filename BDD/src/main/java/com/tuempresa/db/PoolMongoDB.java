@@ -32,7 +32,7 @@ public class PoolMongoDB {
 
             return db;
         } catch (MongoException e) {
-            System.err.println("❌ Error al conectarse con MongoDB: " + e.getMessage());
+            System.err.println("Error al conectarse con MongoDB: " + e.getMessage());
             return null;
         }
     }

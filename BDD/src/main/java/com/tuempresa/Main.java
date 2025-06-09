@@ -1,5 +1,8 @@
 package com.tuempresa;
 
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import com.tuempresa.db.PoolRedis;
 import com.tuempresa.exceptions.ErrorConectionRedisException;
 import redis.clients.jedis.Jedis;
@@ -8,9 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import java.util.Scanner;
-
-import com.tuempresa.Timer;
+import com.tuempresa.auxiliares.Timer;
 
 
 /*
@@ -86,6 +87,20 @@ public class Main {
         timer.iniciar();
 
         // PARTE 3 - GESTION DE PRODUCTOS
+        /*
+        ============== EJEMPLO DE IMPLEMENTACIÓN DEL MAIN DEL CATÁLOGO, NO ES EL CARRITO
+        MongoClient client = MongoClients.create("mongodb://localhost:27017");
+        MongoDatabase db = client.getDatabase("tienda");
 
+        ProductoDAO dao = new ProductoDAO(db);
+
+        Producto p = new Producto();
+        p.setNombre("Mouse Gamer");
+        p.setDescripcion("Con luces RGB y sensor de alta precisión");
+        p.setPrecio_actual(5999.99);
+
+        dao.insertarProducto(p);  // lo guarda en Mongo
+
+         */
     }
 }

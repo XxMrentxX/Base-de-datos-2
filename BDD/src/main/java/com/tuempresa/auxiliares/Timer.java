@@ -1,4 +1,4 @@
-package com.tuempresa;
+package com.tuempresa.auxiliares;
 
 import java.time.LocalDateTime;
 import java.time.Duration;

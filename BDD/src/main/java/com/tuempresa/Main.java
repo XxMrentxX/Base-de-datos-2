@@ -40,9 +40,9 @@ public class Main {
 
                 System.out.println("1. Ingresar cuenta \n");
                 System.out.println("2. Registrar cuenta nueva");
-                String Opcion = scanner.nextLine();
+                String opcion = scanner.nextLine();
 
-                if (Opcion.equals("1")) {
+                if (opcion.equals("1")) {
                     System.out.println("Ingrese DNI");
                     String DNI = scanner.nextLine();
                     String claveRedis = "usuario:" + DNI;
@@ -53,7 +53,7 @@ public class Main {
 
                     }
 
-                } else if (Opcion.equals("2")) {
+                } else if (opcion.equals("2")) {
                     System.out.println("Ingrese DNI:");
                     String DNI = scanner.nextLine();
 
@@ -83,8 +83,32 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        // Se loguea, entonces iniciamos timer
+        // Usuario se loguea, iniciar timer
         timer.iniciar();
+
+        int opcion = 0;
+        while(opcion != 6){
+            Scanner scanner = new Scanner(System.in);
+
+            System.out.println("1. Agregar Producto \n");
+            System.out.println("2. Eliminar Producto \n");
+            System.out.println("3. Cambiar Producto \n");
+            System.out.println("4. Confirmar Pedido \n");
+            System.out.println("5. Mostrar Catalogo \n");
+            System.out.println("6. Mostrar Carrito \n");
+            System.out.println("7. Terminar Sesion \n");
+            opcion = scanner.nextInt();
+            switch (opcion) {
+                case 1:
+                    System.out.println("Agregar Producto");
+                case 7:
+                    System.out.println("Terminando el programa...");
+                    timer.parar();
+                    break;
+            }
+
+        }
+
 
         // PARTE 3 - GESTION DE PRODUCTOS
         /*

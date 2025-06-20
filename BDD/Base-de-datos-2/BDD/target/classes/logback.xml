@@ -1,0 +1,5 @@
+<configuration>
+    <!-- Desactiva completamente todos los logs de SLF4J/Logback -->
+    <root level="OFF" />
+</configuration>
+

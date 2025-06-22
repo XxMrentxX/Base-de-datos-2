@@ -1,20 +1,22 @@
-package com.tuempresa;
+package com.tuempresa.pedido;
 
 import java.util.UUID;
 public class ItemPedido {
     private UUID productoId;
     private String nombreProducto;
     private int cantidad;
+    private String empresa;
     private double precioUnitario;
     private double subtotal;
     private double iva;
     private double porcentajeDescuento;
     private double total;
 
-    public ItemPedido(String nombreProducto, int cantidad, double precioUnitario, double subtotal, double iva, double porcentajeDescuento, double total) {
+    public ItemPedido(String nombreProducto, int cantidad, String empresa, double precioUnitario, double subtotal, double iva, double porcentajeDescuento, double total) {
         this.productoId = UUID.randomUUID();
         this.nombreProducto = nombreProducto;
         this.cantidad = cantidad;
+        this.empresa = empresa;
         this.precioUnitario = precioUnitario;
         this.subtotal = subtotal;
         this.iva = iva;
@@ -40,6 +42,14 @@ public class ItemPedido {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+    }
+
+    public String getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(String empresa) {
+        this.empresa = empresa;
     }
 
     public double getPrecioUnitario() {

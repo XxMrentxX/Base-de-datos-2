@@ -3,12 +3,14 @@ package com.tuempresa;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.tuempresa.producto.Producto;
 import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 import com.mongodb.client.FindIterable;
 
+// PARTE 9 - CATALOGO DE PRODUCTOS
 public class Stock {
 
     private final MongoCollection<Document> coleccion;
@@ -56,7 +58,7 @@ public class Stock {
                     .append("id", p.getId())
                     .append("nombre", p.getNombre())
                     .append("descripcion", p.getDescripcion())
-                    .append("precio_actual", p.getPrecio_actual())
+                    .append("precio_actual", p.getPrecioActual())
                     .append("imagenes", p.getImagenes())
                     .append("videos", p.getVideos())
                     .append("comentarios", new ArrayList<>())

@@ -1,17 +1,11 @@
-package com.tuempresa;
+package com.tuempresa.db;
 
 import redis.clients.jedis.Jedis;
-import com.tuempresa.db.PoolRedis;
 import com.tuempresa.exceptions.ErrorConectionRedisException;
 
-import com.tuempresa.db.PoolNeo4j;
-import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCollection;
-import org.bson.Document;
-import com.tuempresa.db.PoolMongoDB;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.internal.core.metadata.DefaultEndPoint;

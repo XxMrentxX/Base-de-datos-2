@@ -1,42 +1,34 @@
 package com.tuempresa.auxiliares;
 
+import com.tuempresa.clasesabstractas.Cambio;
+
 import java.util.Date;
 
-public class CambioPrecio {
-    private Date fecha;
-    private double precio_anterior;
-    private double precio_nuevo;
-    private String operador;
+public class CambioPrecio extends Cambio {
+    private double precioAnterior;
+    private double precioNuevo;
 
-    public Date getFecha() {
-        return fecha;
+    public CambioPrecio(Date fecha, String operador, double precioAnterior, double precioNuevo) {
+        super(fecha, operador);
+        this.precioAnterior = precioAnterior;
+        this.precioNuevo = precioNuevo;
     }
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
+    public double getPrecioAnterior() {
+        return precioAnterior;
     }
 
-    public double getPrecio_anterior() {
-        return precio_anterior;
+    public double getPrecioNuevo() {
+        return precioNuevo;
     }
 
-    public void setPrecio_anterior(double precio_anterior) {
-        this.precio_anterior = precio_anterior;
+    @Override
+    public String getTipo() {
+        return "precio";
     }
 
-    public double getPrecio_nuevo() {
-        return precio_nuevo;
-    }
-
-    public void setPrecio_nuevo(double precio_nuevo) {
-        this.precio_nuevo = precio_nuevo;
-    }
-
-    public String getOperador() {
-        return operador;
-    }
-
-    public void setOperador(String operador) {
-        this.operador = operador;
+    @Override
+    public String getResumen() {
+        return "Cambio de precio: " + precioAnterior + " → " + precioNuevo;
     }
 }

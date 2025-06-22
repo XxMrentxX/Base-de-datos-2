@@ -1,52 +1,40 @@
 package com.tuempresa.auxiliares;
 
+import com.tuempresa.clasesabstractas.Cambio;
+
 import java.util.Date;
 
-public class CambioCampo {
-    private Date fecha;
-    private String campo_modificado;
-    private String valor_anterior;
-    private String valor_nuevo;
-    private String operador;
+public class CambioCampo extends Cambio {
+    private String campoModificado;
+    private String valorAnterior;
+    private String valorNuevo;
 
-    // Getters y Setters
-    public Date getFecha() {
-        return fecha;
+    public CambioCampo(Date fecha, String operador, String campoModificado, String valorAnterior, String valorNuevo) {
+        super(fecha, operador);
+        this.campoModificado = campoModificado;
+        this.valorAnterior = valorAnterior;
+        this.valorNuevo = valorNuevo;
     }
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
+    public String getCampoModificado() {
+        return campoModificado;
     }
 
-    public String getCampo_modificado() {
-        return campo_modificado;
+    public String getValorAnterior() {
+        return valorAnterior;
     }
 
-    public void setCampo_modificado(String campo_modificado) {
-        this.campo_modificado = campo_modificado;
+    public String getValorNuevo() {
+        return valorNuevo;
     }
 
-    public String getValor_anterior() {
-        return valor_anterior;
+    @Override
+    public String getTipo() {
+        return "campo";
     }
 
-    public void setValor_anterior(String valor_anterior) {
-        this.valor_anterior = valor_anterior;
-    }
-
-    public String getValor_nuevo() {
-        return valor_nuevo;
-    }
-
-    public void setValor_nuevo(String valor_nuevo) {
-        this.valor_nuevo = valor_nuevo;
-    }
-
-    public String getOperador() {
-        return operador;
-    }
-
-    public void setOperador(String operador) {
-        this.operador = operador;
+    @Override
+    public String getResumen() {
+        return "Cambio en '" + campoModificado + "': " + valorAnterior + " → " + valorNuevo;
     }
 }

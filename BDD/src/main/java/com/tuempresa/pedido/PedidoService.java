@@ -1,20 +1,15 @@
-package com.tuempresa;
+package com.tuempresa.pedido;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
+import com.tuempresa.Carrito;
 import com.tuempresa.db.PoolMongoDB;
 import org.bson.Document;
-import org.bson.types.ObjectId;
+
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.List;
 import java.util.Date;
-import com.tuempresa.ItemPedido;
 
-// PARTE 6 - GENERAR FACTURA
 public class PedidoService {
     private static PedidoService instancia;
 
@@ -50,6 +45,7 @@ public class PedidoService {
                         .append("productoId", item.getProductoId())
                         .append("nombre", item.getNombreProducto())
                         .append("cantidad", item.getCantidad())
+                        .append("empresa", item.getEmpresa())
                         .append("precioUnitario", item.getPrecioUnitario())
                         .append("porcentajeDescuento", item.getPorcentajeDescuento())
                         .append("subtotal", subtotal)

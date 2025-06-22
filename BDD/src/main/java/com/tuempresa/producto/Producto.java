@@ -1,9 +1,7 @@
-package com.tuempresa;
+package com.tuempresa.producto;
 
-import com.tuempresa.auxiliares.CambioCampo;
-import com.tuempresa.auxiliares.CambioPrecio;
 import com.tuempresa.auxiliares.Comentario;
-import org.bson.types.ObjectId;
+import com.tuempresa.clasesabstractas.Cambio;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,23 +10,24 @@ public class Producto {
     private String id;
     private String nombre;
     private String descripcion;
+    private String empresa;
     private List<String> imagenes;
     private List<String> videos;
     private List<Comentario> comentarios;
-    private double precio_actual;
-    private List<CambioPrecio> historial_precio;
-    private List<CambioCampo> historial_cambios;
+    private double precioActual;
+    private List<Cambio> historialCambios;
 
-    public Producto(String id, String nombre, String descripcion, List<String> imagenes, List<String> videos, List<Comentario> comentarios, double precio_actual, List<CambioPrecio> historial_precio, List<CambioCampo> historial_cambios) {
+
+    public Producto(String id, String nombre, String descripcion, String empresa, List<String> imagenes, List<String> videos, List<Comentario> comentarios, double precio_actual, List<Cambio> historialCambios) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
+        this.empresa = empresa;
         this.imagenes = new ArrayList<>();
         this.videos = new ArrayList<>();
         this.comentarios = new ArrayList<>();
-        this.precio_actual = precio_actual;
-        this.historial_precio = new ArrayList<>();
-        this.historial_cambios = new ArrayList<>();
+        this.precioActual = precio_actual;
+        this.historialCambios = new ArrayList<>();
     }
 
     public String getId() {
@@ -55,6 +54,12 @@ public class Producto {
         this.descripcion = descripcion;
     }
 
+    public String getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(String empresa) {}
+
     public List<String> getImagenes() {
         return imagenes;
     }
@@ -75,31 +80,24 @@ public class Producto {
         return comentarios;
     }
 
-    public void setComentarios(List<Comentario> comentarios) {
-        this.comentarios = comentarios;
+    public double getPrecioActual() {
+        return precioActual;
     }
 
-    public double getPrecio_actual() {
-        return precio_actual;
+    public void setPrecioActual(double precio_actual) {
+        this.precioActual = precio_actual;
     }
 
-    public void setPrecio_actual(double precio_actual) {
-        this.precio_actual = precio_actual;
+    public List<Cambio> getHistorialCambios() {
+        return historialCambios;
     }
 
-    public List<CambioPrecio> getHistorial_precio() {
-        return historial_precio;
+    public void agregarComentario(Comentario comentario){
+        this.comentarios.add(comentario);
     }
 
-    public void setHistorial_precio(List<CambioPrecio> historial_precio) {
-        this.historial_precio = historial_precio;
-    }
-
-    public List<CambioCampo> getHistorial_cambios() {
-        return historial_cambios;
-    }
-
-    public void setHistorial_cambios(List<CambioCampo> historial_cambios) {
-        this.historial_cambios = historial_cambios;
+    public void agregarCambio (Cambio cambio){
+        historialCambios.add(cambio);
+        System.out.println("Cambio agregado: " + cambio.getResumen());
     }
 }

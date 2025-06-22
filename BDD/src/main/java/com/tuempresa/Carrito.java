@@ -29,19 +29,19 @@ public class Carrito {
         coleccion = db.getCollection("estados_carrito");
     }
 
-    public static void agregarItem(String usuario, ItemPedido item) {
+    public void agregarItem(String usuario, ItemPedido item) {
         List<ItemPedido> items = restaurarUltimoEstado(usuario);
         items.add(item);
         guardarEstado(usuario, items);
     }
 
-    public static void eliminarItem(String usuario, UUID idProducto) {
+    public void eliminarItem(String usuario, UUID idProducto) {
         List<ItemPedido> items = restaurarUltimoEstado(usuario);
         items.removeIf(i -> i.getProductoId().equals(idProducto));
         guardarEstado(usuario, items);
     }
 
-    public static void guardarEstado(String usuario, List<ItemPedido> items) {
+    public void guardarEstado(String usuario, List<ItemPedido> items) {
         List<Document> itemsDoc = new ArrayList<>();
 
         for (ItemPedido item : items) {
@@ -67,7 +67,7 @@ public class Carrito {
         coleccion.insertOne(doc);
     }
 
-    public static List<ItemPedido> restaurarUltimoEstado(String usuario) {
+    public List<ItemPedido> restaurarUltimoEstado(String usuario) {
         Document ultimo = coleccion.find(new Document("usuario", usuario))
                 .sort(new Document("version", -1))
                 .first();
@@ -94,14 +94,39 @@ public class Carrito {
         return resultado;
     }
 
-    private static int obtenerProximaVersion(String usuario) {
+    private int obtenerProximaVersion(String usuario) {
         Document ultimo = coleccion.find(new Document("usuario", usuario))
                 .sort(new Document("version", -1))
                 .first();
         return (ultimo != null) ? ultimo.getInteger("version") + 1 : 1;
     }
 
-    // Getters
+    public void imprimirCarrito() {
+        if (itemsPedido.isEmpty()) {
+            System.out.println("El carrito está vacío.");
+            return;
+        }
+
+        System.out.println("\nCarrito de compras:");
+
+        int i = 1;
+        for (ItemPedido item : itemsPedido) {
+            System.out.println("Ítem #" + i++);
+            System.out.println("Producto: " + item.getNombreProducto());
+            System.out.println("Empresa: " + item.getEmpresa());
+            System.out.println("Cantidad: " + item.getCantidad());
+            System.out.println("Precio unitario: $" + item.getPrecioUnitario());
+            System.out.println("Subtotal: $" + item.getSubtotal());
+            System.out.println("IVA: $" + item.getIva());
+            System.out.println("Descuento: " + item.getPorcentajeDescuento() + "%");
+            System.out.println("Total: $" + item.getTotal());
+            System.out.println("-------------------------------------------------------------");
+        }
+
+        double totalFinal = itemsPedido.stream().mapToDouble(ItemPedido::getTotal).sum();
+        System.out.printf("Total general del carrito: $%.2f\n", totalFinal);
+    }
+
     public List<ItemPedido> getItemsPedido() {
         return itemsPedido;
     }

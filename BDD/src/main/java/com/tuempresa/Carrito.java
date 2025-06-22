@@ -18,6 +18,8 @@ public class Carrito {
     private List<ItemPedido> itemsPedido = new ArrayList<>();
 
     private static MongoCollection<Document> coleccion = null;
+    private static Map<String, Integer> versionActualUsuario = new HashMap<>();
+
 
     public Carrito(String dni, String nombre, String apellido, String direccion, String condicionIVA) {
         MongoDatabase db = PoolMongoDB.getInstancia().getConexion("carritoDB");
@@ -27,6 +29,7 @@ public class Carrito {
         this.direccion = direccion;
         this.condicionIVA = condicionIVA;
         coleccion = db.getCollection("estados_carrito");
+        versionActualUsuario.putIfAbsent(dni, 0);
     }
 
     public void agregarItem(String usuario, ItemPedido item) {
@@ -58,24 +61,35 @@ public class Carrito {
             itemsDoc.add(docItem);
         }
 
+        int nuevaVersion = obtenerProximaVersion(usuario);
+        versionActualUsuario.put(usuario, nuevaVersion);
+
         Document doc = new Document()
                 .append("usuario", usuario)
                 .append("timestamp", Instant.now().toString())
                 .append("items", itemsDoc)
-                .append("version", obtenerProximaVersion(usuario));
+                .append("version", nuevaVersion);
 
         coleccion.insertOne(doc);
     }
 
     public List<ItemPedido> restaurarUltimoEstado(String usuario) {
+        return restaurarEstadoPorVersion(usuario, versionActualUsuario.getOrDefault(usuario, 1));
+    }
+
+    private int obtenerProximaVersion(String usuario) {
         Document ultimo = coleccion.find(new Document("usuario", usuario))
                 .sort(new Document("version", -1))
                 .first();
+        return (ultimo != null) ? ultimo.getInteger("version") + 1 : 1;
+    }
 
+    private List<ItemPedido> restaurarEstadoPorVersion(String usuario, int version) {
+        Document doc = coleccion.find(new Document("usuario", usuario).append("version", version)).first();
         List<ItemPedido> resultado = new ArrayList<>();
 
-        if (ultimo != null && ultimo.containsKey("items")) {
-            List<Document> docs = (List<Document>) ultimo.get("items");
+        if (doc != null && doc.containsKey("items")) {
+            List<Document> docs = (List<Document>) doc.get("items");
             for (Document d : docs) {
                 UUID id = UUID.fromString(d.getString("producto_id"));
                 String nombre = d.getString("nombre");
@@ -91,14 +105,79 @@ public class Carrito {
                 resultado.add(item);
             }
         }
+
         return resultado;
     }
 
-    private int obtenerProximaVersion(String usuario) {
+    public boolean restaurarEstadoAnterior(String usuario) {
+        int versionActual = versionActualUsuario.getOrDefault(usuario, 1);
+
+        if (versionActual <= 1) {
+            return false;
+        }
+
+        Document estadoAnterior = coleccion.find(new Document("usuario", usuario)
+                .append("version", versionActual - 1)).first();
+
+        if (estadoAnterior == null) return false;
+
+        List<ItemPedido> items = obtenerItemsDesdeDocumento(estadoAnterior);
+        this.itemsPedido = items;
+        guardarEstado(usuario, items);
+        versionActualUsuario.put(usuario, versionActual - 1);
+
+        return true;
+    }
+
+    public boolean restaurarEstadoSiguiente(String usuario) {
+        int versionActual = versionActualUsuario.getOrDefault(usuario, 1);
+        int proximaVersion = versionActual + 1;
+
+        Document estadoPosterior = coleccion.find(new Document("usuario", usuario)
+                .append("version", proximaVersion)).first();
+
+        if (estadoPosterior == null) {
+            return false;
+        }
+
+        List<ItemPedido> items = obtenerItemsDesdeDocumento(estadoPosterior);
+        this.itemsPedido = items;
+        guardarEstado(usuario, items);
+        versionActualUsuario.put(usuario, proximaVersion);
+
+        return true;
+    }
+
+    private int obtenerUltimaVersion(String usuario) {
         Document ultimo = coleccion.find(new Document("usuario", usuario))
                 .sort(new Document("version", -1))
                 .first();
-        return (ultimo != null) ? ultimo.getInteger("version") + 1 : 1;
+
+        return (ultimo != null) ? ultimo.getInteger("version") : 0;
+    }
+
+    private List<ItemPedido> obtenerItemsDesdeDocumento(Document doc) {
+        List<ItemPedido> resultado = new ArrayList<>();
+        List<Document> docs = (List<Document>) doc.get("items");
+
+        if (docs != null) {
+            for (Document d : docs) {
+                UUID id = UUID.fromString(d.getString("producto_id"));
+                String nombre = d.getString("nombre");
+                String empresa = d.getString("empresa");
+                int cantidad = d.getInteger("cantidad");
+                double precio = d.getDouble("precio_unitario");
+                double subtotal = d.getDouble("subtotal");
+                double iva = d.getDouble("iva");
+                double descuento = d.getDouble("porcentaje_descuento");
+                double total = d.getDouble("total");
+
+                ItemPedido item = new ItemPedido(nombre, cantidad, empresa, precio, subtotal, iva, descuento, total);
+                resultado.add(item);
+            }
+        }
+
+        return resultado;
     }
 
     public void imprimirCarrito() {

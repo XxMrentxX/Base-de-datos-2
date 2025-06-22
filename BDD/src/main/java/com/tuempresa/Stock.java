@@ -118,6 +118,27 @@ public class Stock {
         );
     }
 
+    public void agregarProducto(Producto producto, int cantidadInicial) {
+        Document doc = new Document("id", producto.getId())
+                .append("nombre", producto.getNombre())
+                .append("descripcion", producto.getDescripcion())
+                .append("empresa", producto.getEmpresa())
+                .append("precio_actual", producto.getPrecioActual())
+                .append("stock", cantidadInicial);
+
+        coleccion.insertOne(doc);
+        System.out.println("Producto agregado con éxito.");
+    }
+
+    public void eliminarProductoPorId(String id) {
+        coleccion.deleteOne(eq("id", id));
+        System.out.println("Producto eliminado si existía.");
+    }
+
+    public void modificarCantidadStock(String id, int nuevaCantidad) {
+        coleccion.updateOne(eq("id", id), Updates.set("stock", nuevaCantidad));
+        System.out.println("Cantidad de stock actualizada.");
+    }
 
     public static void verificarBDD(List<Producto> listaProductos) {
         MongoDatabase db = com.tuempresa.db.PoolMongoDB.getInstancia().getConexion("carritoDB");

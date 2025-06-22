@@ -1,4 +1,4 @@
-package com.tuempresa;
+package com.tuempresa.operaciones;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
@@ -97,5 +97,39 @@ public class Facturacion {
             System.out.println("Error al guardar la factura en Cassandra.");
         }
         return result;
+    }
+
+    public static void mostrarFacturas(String dniCliente, CqlSession session) {
+        try {
+            String query = "SELECT * FROM facturas WHERE dni_cliente = ? ALLOW FILTERING;";
+            var prepared = session.prepare(query);
+            var bound = prepared.bind(dniCliente);
+
+            var resultSet = session.execute(bound);
+            System.out.println("\n=== FACTURAS DEL CLIENTE " + dniCliente + " ===");
+
+            boolean hayFacturas = false;
+            for (var row : resultSet) {
+                hayFacturas = true;
+                System.out.println("\n------------------------------");
+                System.out.println("ID Factura     : " + row.getUuid("id_factura"));
+                System.out.println("ID Pedido      : " + row.getString("id_pedido"));
+                System.out.println("Nombre Cliente : " + row.getString("nombre_cliente"));
+                System.out.println("Dirección      : " + row.getString("direccion"));
+                System.out.println("Condición IVA  : " + row.getString("condicion_iva"));
+                System.out.println("Forma de Pago  : " + row.getString("forma_pago"));
+                System.out.println("Fecha          : " + row.getString("fecha_hora"));
+                System.out.printf("Total Sin IVA  : $%.2f\n", row.getDouble("total_sin_iva"));
+                System.out.printf("IVA            : $%.2f\n", row.getDouble("total_iva"));
+                System.out.printf("Total Con IVA  : $%.2f\n", row.getDouble("total_con_iva"));
+            }
+
+            if (!hayFacturas) {
+                System.out.println("No se encontraron facturas para ese cliente.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error al mostrar facturas: " + e.getMessage());
+        }
     }
 }

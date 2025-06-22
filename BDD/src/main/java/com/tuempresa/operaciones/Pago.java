@@ -1,9 +1,10 @@
-package com.tuempresa;
+package com.tuempresa.operaciones;
 
 import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,5 +43,28 @@ public class Pago {
 
         System.out.println("Pago registrado con ID: " + idPago);
         return idPago;
+    }
+
+    public static void mostrarPagos(String dniCliente, CqlSession session) {
+        String query = "SELECT id_pago, id_factura, forma_pago, monto, fecha_hora FROM pagos WHERE dni_cliente = ? ALLOW FILTERING;";
+        ResultSet resultado = session.execute(session.prepare(query).bind(dniCliente));
+
+
+        if (resultado.all().isEmpty()) {
+            System.out.println("No se encontraron pagos para este cliente.");
+            return;
+        }
+
+        System.out.println("\nPagos del cliente: " + dniCliente);
+
+        for (Row row : resultado) {
+            System.out.printf("\n- ID Pago: %s\n  Factura: %s\n  Forma: %s\n  Monto: $%.2f\n  Fecha: %s\n",
+                    row.getUuid("id_pago"),
+                    row.getUuid("id_factura"),
+                    row.getString("forma_pago"),
+                    row.getDouble("monto"),
+                    row.getString("fecha_hora")
+            );
+        }
     }
 }

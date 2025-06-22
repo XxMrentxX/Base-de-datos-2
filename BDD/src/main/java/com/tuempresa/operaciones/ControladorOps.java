@@ -1,4 +1,4 @@
-package com.tuempresa;
+package com.tuempresa.operaciones;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 

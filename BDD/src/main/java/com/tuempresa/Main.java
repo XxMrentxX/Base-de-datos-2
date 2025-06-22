@@ -6,12 +6,15 @@ import com.tuempresa.enums.Categoria;
 import com.tuempresa.enums.CondicionIVA;
 import com.tuempresa.enums.FormaPago;
 import com.tuempresa.exceptions.ErrorConectionRedisException;
+import com.tuempresa.operaciones.Facturacion;
+import com.tuempresa.operaciones.Pago;
 import com.tuempresa.pedido.ItemPedido;
 import com.tuempresa.pedido.PedidoService;
+import com.tuempresa.producto.Producto;
 import org.bson.Document;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +45,7 @@ public class Main {
 
         boolean ejecutando = true;
         boolean terminar = false; // TERMINA EL PROGRAMA ENTERO
+        boolean admin = false;
 
         while (ejecutando){
             System.out.println("Por favor seleccione una opcion: ");
@@ -73,6 +77,10 @@ public class Main {
                             ejecutando = false;
                         } else {
                             System.out.println("Credenciales incorrectas. Intente de nuevo.");
+                        }
+
+                        if (dni == "45073584" && password == "123"){
+                            admin = true;
                         }
 
                     } catch (ErrorConectionRedisException e) {
@@ -169,182 +177,358 @@ public class Main {
 
 
         while(!terminar){
-            System.out.println("¡Bienvenido " + usuarioActual.getNombre() + "!");
-            timer.iniciar();
-            Stock catalogo = new Stock();
+            int opcion, subopcion;
+            Stock catalogo;
+            switch (admin){
+                case true:
+                    catalogo = new Stock();
+                    System.out.println("¡Bienvenido admin:" + usuarioActual.getNombre() + "!");
 
-            System.out.println("\nMENU PRINCIPAL");
-            System.out.println("1. Ver Catálogo de Productos");
-            System.out.println("2. Carrito de Compras");
-            System.out.println("3. Mi Perfil");
-            System.out.println("4. Cerrar Sesión");
-            int opcion = scanner.nextInt();
+                    System.out.println("\nMENU ADMINISTRATIVO");
+                    System.out.println("1. Listar catálogo de productos");
+                    System.out.println("2. Agregar productos stock");
+                    System.out.println("3. Eliminar productos stock");
+                    System.out.println("4. Modificar productos stock");
+                    System.out.println("5. Mostrar historial de cambios");
+                    System.out.println("6. Mostrar historial de facturas/pago para un usuario");
+                    System.out.println("7. Cerrar Sesión");
+                    opcion = scanner.nextInt();
 
-            // ADMIN DEBERIA PODER VER EL HISTORIAL DE CAMBIOS DE LOS PRODUCTOS, Y TAMBIEN EDITARLOS
-            // TAMBIEN DEBERIA PODER VER HISTORIAL DE FACTURAS/PAGOS DE UN USUARIO
-
-            int subopcion;
-            switch(opcion){
-                case 1:
-                    System.out.println("\nCATÁLOGO DE PRODUCTOS");
-                    System.out.println("1. Ver todos los productos");
-                    System.out.println("2. Agregar comentario a producto");
-                    System.out.println("3. Volver al menú principal");
-                    subopcion = scanner.nextInt();
-                    switch(subopcion){
+                    switch (opcion){
                         case 1:
                             catalogo.listarProductosEnStock();
                             break;
+
                         case 2:
-                            System.out.println("Ingrese el ID del producto al que desea agregar un comentario: ");
-                            String productoId = scanner.nextLine();
-                            System.out.println("Ingrese el comentario: ");
-                            String comentario = scanner.nextLine();
-                            catalogo.agregarComentario(productoId, comentario, usuarioActual.getDni());
+                            scanner.nextLine();
+
+                            System.out.println("Ingrese nombre del producto:");
+                            String nombre = scanner.nextLine();
+
+                            System.out.println("Ingrese descripción del producto:");
+                            String descripcion = scanner.nextLine();
+
+                            System.out.println("Ingrese empresa fabricante:");
+                            String empresa = scanner.nextLine();
+
+                            System.out.println("Ingrese precio del producto:");
+                            double precio = scanner.nextDouble();
+                            scanner.nextLine();
+
+                            System.out.println("Ingrese stock inicial:");
+                            int stockInicial = scanner.nextInt();
+                            scanner.nextLine();
+
+                            List<String> imagenes = List.of("imagen.jpg");
+                            List<String> videos = List.of("video.mp4");
+
+                            Producto nuevoProducto = new Producto(
+                                    UUID.randomUUID().toString(),
+                                    nombre,
+                                    descripcion,
+                                    empresa,
+                                    imagenes,
+                                    videos,
+                                    new ArrayList<>(),
+                                    precio,
+                                    new ArrayList<>()
+                            );
+
+                            catalogo.agregarProducto(nuevoProducto, stockInicial);
                             break;
+
                         case 3:
+                            scanner.nextLine();
+                            System.out.println("Ingrese el ID del producto a eliminar: ");
+                            String idProducto = scanner.nextLine();
+
+                            if (catalogo.buscarProducto(idProducto) == null) {
+                                System.out.println("No existe un producto con ese ID");
+                            } else{
+                                catalogo.eliminarProductoPorId(idProducto);
+                                System.out.println("Producto eliminado");
+                            }
                             break;
+
+                        case 4:
+                            scanner.nextLine();
+
+                            System.out.println("Ingrese el ID del producto a modificar:");
+                            String id = scanner.nextLine();
+
+                            Document prod = catalogo.buscarProducto(id);
+                            if (prod == null) {
+                                System.out.println("No se encontró un producto con ese ID.");
+                                break;
+                            }
+
+                            System.out.println("Parámetro a modificar:");
+                            System.out.println("1. Precio del producto");
+                            System.out.println("2. Cantidad en stock");
+                            subopcion = scanner.nextInt();
+
+                            switch (subopcion) {
+                                case 1:
+                                    System.out.print("Ingrese el nuevo precio: ");
+                                    double nuevoPrecio = scanner.nextDouble();
+                                    scanner.nextLine();
+                                    catalogo.actualizarPrecio(id, nuevoPrecio, usuarioActual.getDni());
+                                    break;
+
+                                case 2:
+                                    System.out.print("Ingrese la nueva cantidad de stock: ");
+                                    int nuevaCantidad = scanner.nextInt();
+                                    scanner.nextLine();
+                                    catalogo.modificarCantidadStock(id, nuevaCantidad);
+                                    break;
+
+                                default:
+                                    System.out.println("Opción inválida.");
+                                    break;
+                            }
+                            break;
+
+                        case 5:
+                            scanner.nextLine();
+                            System.out.println("Ingrese el ID del producto para ver su historial de cambios:");
+                            String idProd = scanner.nextLine();
+
+                            Document docProducto = catalogo.buscarProducto(idProd);
+
+                            if (docProducto == null) {
+                                System.out.println("No se encontró un producto con ese ID.");
+                                break;
+                            }
+
+                            List<Document> historial = docProducto.getList("historial_cambios", Document.class);
+
+                            if (historial == null || historial.isEmpty()) {
+                                System.out.println("El producto no tiene historial de cambios.");
+                            } else {
+                                System.out.println("Historial de cambios del producto:");
+                                for (Document cambio : historial) {
+                                    System.out.println("Fecha: " + cambio.getString("fecha"));
+                                    System.out.println("Tipo de cambio: " + cambio.getString("tipo"));
+                                    System.out.println("Valor anterior: " + cambio.getString("valor_anterior"));
+                                    System.out.println("Valor nuevo: " + cambio.getString("valor_nuevo"));
+                                    System.out.println("Operador: " + cambio.getString("operador"));
+                                }
+                            }
+                            break;
+
+                        case 6:
+                            scanner.nextLine();
+                            System.out.println("Ingrese DNI del cliente:");
+                            String dni = scanner.nextLine();
+
+                            try (CqlSession session = CqlSession.builder().build()) {
+                                Facturacion.mostrarFacturas(dni, session);
+                                Pago.mostrarPagos(dni, session);
+                            } catch (Exception e) {
+                                System.out.println("Error al consultar historial: " + e.getMessage());
+                            }
+                            break;
+
+                        case 7:
+                            System.out.println("Terminando sesión...");
+                            terminar = true;
+                            break;
+
+                        default:
+                            System.out.println("Opción no valida!");
+                            break;
+                    }
+                    break;
+
+                default:
+                    System.out.println("¡Bienvenido " + usuarioActual.getNombre() + "!");
+                    timer.iniciar();
+                    catalogo = new Stock();
+
+                    System.out.println("\nMENU PRINCIPAL");
+                    System.out.println("1. Ver Catálogo de Productos");
+                    System.out.println("2. Carrito de Compras");
+                    System.out.println("3. Mi Perfil");
+                    System.out.println("4. Cerrar Sesión");
+                    opcion = scanner.nextInt();
+                    scanner.nextLine();
+
+                    switch(opcion){
+                        case 1:
+                            System.out.println("\nCATÁLOGO DE PRODUCTOS");
+                            System.out.println("1. Ver todos los productos");
+                            System.out.println("2. Agregar comentario a producto");
+                            System.out.println("3. Volver al menú principal");
+
+                            subopcion = scanner.nextInt();
+
+
+                            switch(subopcion){
+                                case 1:
+                                    catalogo.listarProductosEnStock();
+                                    break;
+                                case 2:
+                                    System.out.println("Ingrese el ID del producto al que desea agregar un comentario: ");
+                                    String productoId = scanner.nextLine();
+                                    System.out.println("Ingrese el comentario: ");
+                                    String comentario = scanner.nextLine();
+                                    catalogo.agregarComentario(productoId, comentario, usuarioActual.getDni());
+                                    break;
+                                case 3:
+                                    break;
+                                default:
+                                    System.out.println("Opcion no valida");
+                                    break;
+                            }
+                            break;
+
+                        case 2:
+                            Carrito carrito = new Carrito(usuarioActual.getDni(), usuarioActual.getNombre(), usuarioActual.getApellido(), usuarioActual.getMail(), usuarioActual.getCondicionIVA().getValor());
+                            String productoId;
+
+                            System.out.println("\nCARRITO DE COMPRAS");
+                            System.out.println("1. Ver contenido del carrito");
+                            System.out.println("2. Agregar producto");
+                            System.out.println("3. Eliminar producto");
+                            System.out.println("4. Deshacer último cambio");
+                            System.out.println("5. Rehacer último cambio");
+                            System.out.println("6. Vaciar carrito");
+                            System.out.println("7. Proceder al checkout (convertir a pedido)");
+                            System.out.println("8. Volver al menú principal");
+                            subopcion = scanner.nextInt();
+                            switch (subopcion){
+
+                                case 1:
+                                    carrito.imprimirCarrito();
+                                    break;
+
+                                case 2:
+                                    scanner.nextLine();
+
+                                    System.out.println("Ingrese el ID del producto al que desea agregarlo al carrito: ");
+                                    productoId = scanner.nextLine();
+                                    System.out.println("Ingrese la cantidad: ");
+                                    int cantidad = scanner.nextInt();
+
+                                    if (cantidad <= 0) {
+                                        System.out.println("ERROR: La cantidad debe ser mayor a 0.");
+                                        break;
+                                    } else if (catalogo.buscarProducto(productoId).getInteger("stock") < cantidad) {
+                                        System.out.println("ERROR: No hay suficientes existencias del producto en stock.");
+                                    } else if (catalogo.buscarProducto(productoId) == null) {
+                                        System.out.println("ERROR: No existe el producto con el ID especificado.");
+                                    } else {
+
+                                        Document producto = catalogo.buscarProducto(productoId);
+                                        double iva = 0;
+                                        if (usuarioActual.getCondicionIVA() == CondicionIVA.RESPONSABLE_INSCRIPTO || usuarioActual.getCondicionIVA() == CondicionIVA.CONSUMIDOR_FINAL) {
+                                            iva = 0.21;
+                                        }
+
+                                        double precioUnitario = producto.getDouble("precio_actual");
+                                        double subtotal = cantidad * precioUnitario;
+                                        double montoDescuento = (subtotal * producto.getDouble("porcentaje_descuento")) / 100;
+                                        double subtotalDescuento = subtotal - montoDescuento;
+                                        double montoIva = subtotalDescuento * iva;
+                                        double total = subtotalDescuento + montoIva;
+
+                                        carrito.agregarItem( usuarioActual.getDni(),
+                                                new ItemPedido(
+                                                        producto.getString("nombre"),
+                                                        producto.getInteger("stock"),
+                                                        producto.getString("empresa"),
+                                                        precioUnitario,
+                                                        subtotal,
+                                                        iva,
+                                                        producto.getDouble("porcentaje_descuento"),
+                                                        total
+                                                )
+                                        );
+                                    }
+                                    break;
+
+                                case 3:
+                                    System.out.println("Ingrese el ID del producto que desea eliminar del carrito: ");
+                                    productoId = scanner.nextLine();
+                                    carrito.eliminarItem(usuarioActual.getDni(), UUID.fromString(productoId));
+                                    break;
+
+                                case 4:
+                                    if (carrito.restaurarEstadoAnterior(usuarioActual.getDni())){
+                                        System.out.println("Estado anterior del carrito restaurado");
+                                    } else {
+                                        System.out.println("No hay estados anteriores");
+                                    }
+                                    break;
+
+                                case 5:
+                                    if (carrito.restaurarEstadoSiguiente(usuarioActual.getDni())){
+                                        System.out.println("Estado siguiente del carrito restaurado");
+                                    } else {
+                                        System.out.println("No hay estados posteriores");
+                                    }
+                                    break;
+
+                                case 6:
+                                    carrito.getItemsPedido().clear();
+                                    carrito.guardarEstado(usuarioActual.getDni(), new ArrayList<>());
+                                    break;
+
+                                case 7:
+                                    PedidoService pedidoService = PedidoService.getInstancia();
+                                    String idPedido = pedidoService.guardarPedido(carrito); // REVISAR METODO
+
+                                    FormaPago formaPago = null;
+                                    scanner.nextLine(); // limpiar buffer
+                                    while (formaPago == null) {
+                                        System.out.println("Seleccione forma de pago:");
+                                        int i = 1;
+                                        for (FormaPago fp : FormaPago.values()) {
+                                            System.out.println(i++ + ". " + fp.getDescripcion());
+                                        }
+                                        System.out.print("Ingrese una opción (número o texto): ");
+                                        String opcionPago = scanner.nextLine().trim();
+                                        formaPago = FormaPago.fromInput(opcionPago);
+                                        if (formaPago == null) {
+                                            System.out.println("Opción inválida. Intente de nuevo.");
+                                        }
+                                    }
+
+                                    CqlSession session = CqlSession.builder().build(); // <---- REVISAR ESTO
+                                    Facturacion.generarFactura(idPedido, formaPago.getDescripcion(), session);
+                                    System.out.println("Pedido convertido y facturado correctamente.");
+
+                                    break;
+
+                                case 8:
+                                    break;
+                            }
+                            break;
+
+                        case 3:
+                            System.out.println("\n===== MI PERFIL =====");
+                            System.out.println("Nombre completo : " + usuarioActual.getNombre() + " " + usuarioActual.getApellido());
+                            System.out.println("DNI             : " + usuarioActual.getDni());
+                            System.out.println("E-mail          : " + usuarioActual.getMail());
+                            System.out.println("Condición IVA   : " + usuarioActual.getCondicionIVA().getValor());
+                            System.out.println("Categoría       : " + usuarioActual.getCategoria().getValor());
+                            System.out.println("Sesiones totales: " + usuarioActual.getSesiones());
+                            System.out.println("Tiempo total    : " + usuarioActual.getTiempoTotalMinutos() + " min");
+                            System.out.println("=====================\n");
+                            break;
+
+                        case 4:
+                            System.out.println("Terminando sesion...");
+                            terminar = true;
+                            break;
+
                         default:
                             System.out.println("Opcion no valida");
                             break;
                     }
-                    break;
-
-                case 2:
-                    Carrito carrito = new Carrito(usuarioActual.getDni(), usuarioActual.getNombre(), usuarioActual.getApellido(), usuarioActual.getMail(), usuarioActual.getCondicionIVA().getValor());
-                    String productoId;
-
-                    System.out.println("\nCARRITO DE COMPRAS");
-                    System.out.println("1. Ver contenido del carrito");
-                    System.out.println("2. Agregar producto");
-                    System.out.println("3. Eliminar producto");
-                    System.out.println("4. Deshacer último cambio");
-                    System.out.println("5. Rehacer último cambio");
-                    System.out.println("6. Vaciar carrito");
-                    System.out.println("7. Proceder al checkout (convertir a pedido)");
-                    System.out.println("8. Volver al menú principal");
-                    subopcion = scanner.nextInt();
-                    switch (subopcion){
-                        case 1:
-                            carrito.imprimirCarrito();
-                            break;
-                        case 2:
-                            System.out.println("Ingrese el ID del producto al que desea agregarlo al carrito: ");
-                            productoId = scanner.nextLine();
-                            System.out.println("Ingrese la cantidad: ");
-                            int cantidad = scanner.nextInt();
-                            if (cantidad <= 0) {
-                                System.out.println("ERROR: La cantidad debe ser mayor a 0.");
-                                break;
-                            } else if (catalogo.buscarProducto(productoId).getInteger("stock") < cantidad) {
-                                System.out.println("ERROR: No hay suficientes existencias del producto en stock.");
-                            } else if (catalogo.buscarProducto(productoId) == null) {
-                                System.out.println("ERROR: No existe el producto con el ID especificado.");
-                            } else {
-
-                                Document producto = catalogo.buscarProducto(productoId);
-                                double iva = 0;
-                                if (usuarioActual.getCondicionIVA() == CondicionIVA.RESPONSABLE_INSCRIPTO || usuarioActual.getCondicionIVA() == CondicionIVA.CONSUMIDOR_FINAL) {
-                                    iva = 0.21;
-                                }
-
-                                double precioUnitario = producto.getDouble("precio_actual");
-                                double subtotal = cantidad * precioUnitario;
-                                double montoDescuento = (subtotal * producto.getDouble("porcentaje_descuento")) / 100;
-                                double subtotalDescuento = subtotal - montoDescuento;
-                                double montoIva = subtotalDescuento * iva;
-                                double total = subtotalDescuento + montoIva;
-
-                                carrito.agregarItem( usuarioActual.getDni(),
-                                        new ItemPedido(
-                                            producto.getString("nombre"),
-                                            producto.getInteger("stock"),
-                                            producto.getString("empresa"),
-                                            precioUnitario,
-                                            subtotal,
-                                            iva,
-                                            producto.getDouble("porcentaje_descuento"),
-                                            total
-                                        )
-                                );
-                            }
-                            break;
-
-                        case 3:
-                            System.out.println("Ingrese el ID del producto que desea eliminar del carrito: ");
-                            productoId = scanner.nextLine();
-                            carrito.eliminarItem(usuarioActual.getDni(), UUID.fromString(productoId));
-                            break;
-
-                        case 4:
-                            // VER ESTA OPCION
-                            break;
-
-                        case 5:
-                            // TAMBIEN ESTA
-                            break;
-
-                        case 6:
-                            carrito.getItemsPedido().clear();
-                            carrito.guardarEstado(usuarioActual.getDni(), new ArrayList<>());
-                            break;
-
-                        case 7:
-                            PedidoService pedidoService = PedidoService.getInstancia();
-                            String idPedido = pedidoService.guardarPedido(carrito); // REVISAR METODO
-
-                            FormaPago formaPago = null;
-                            scanner.nextLine(); // limpiar buffer
-                            while (formaPago == null) {
-                                System.out.println("Seleccione forma de pago:");
-                                int i = 1;
-                                for (FormaPago fp : FormaPago.values()) {
-                                    System.out.println(i++ + ". " + fp.getDescripcion());
-                                }
-                                System.out.print("Ingrese una opción (número o texto): ");
-                                String opcionPago = scanner.nextLine().trim();
-                                formaPago = FormaPago.fromInput(opcionPago);
-                                if (formaPago == null) {
-                                    System.out.println("Opción inválida. Intente de nuevo.");
-                                }
-                            }
-
-                            CqlSession session = CqlSession.builder().build(); // <---- REVISAR ESTO
-                            Facturacion.generarFactura(idPedido, formaPago.getDescripcion(), session);
-                            System.out.println("Pedido convertido y facturado correctamente.");
-
-                            break;
-
-                        case 8:
-                            break;
-                    }
-                    break;
-
-                case 3:
-                    System.out.println("\n===== MI PERFIL =====");
-                    System.out.println("Nombre completo : " + usuarioActual.getNombre() + " " + usuarioActual.getApellido());
-                    System.out.println("DNI             : " + usuarioActual.getDni());
-                    System.out.println("E-mail          : " + usuarioActual.getMail());
-                    System.out.println("Condición IVA   : " + usuarioActual.getCondicionIVA().getValor());
-                    System.out.println("Categoría       : " + usuarioActual.getCategoria().getValor());
-                    System.out.println("Sesiones totales: " + usuarioActual.getSesiones());
-                    System.out.println("Tiempo total    : " + usuarioActual.getTiempoTotalMinutos() + " min");
-                    System.out.println("=====================\n");
-                    break;
-
-                case 4:
-                    System.out.println("Terminando sesion...");
-                    terminar = true;
-                    break;
-
-                default:
-                    System.out.println("Opcion no valida");
-                    break;
             }
-
         }
 
-        //  Termina sesion, hay que actualizar la categoria del usuario
         if (usuarioActual != null) {
             long tiempoSesion = timer.parar();
             try {
@@ -356,7 +540,5 @@ public class Main {
                 System.out.println("Error al guardar datos de sesión: " + e.getMessage());
             }
         }
-
-
     }
 }

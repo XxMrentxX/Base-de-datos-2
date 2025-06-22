@@ -23,7 +23,7 @@ public class Producto {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.empresa = empresa;
-        this.imagenes = new ArrayList<>();
+        this.imagenes = imagenes != null ? imagenes : new ArrayList<>();
         this.videos = new ArrayList<>();
         this.comentarios = new ArrayList<>();
         this.precioActual = precio_actual;
@@ -58,7 +58,7 @@ public class Producto {
         return empresa;
     }
 
-    public void setEmpresa(String empresa) {}
+    public void setEmpresa(String empresa) {this.empresa = empresa;}
 
     public List<String> getImagenes() {
         return imagenes;

@@ -10,7 +10,6 @@ import org.bson.types.ObjectId;
 
 import java.util.*;
 
-// PARTE 6 - GENERAR FACTURA
 public class Facturacion {
 
     public static Map<UUID, Double> generarFactura(String idPedido, String formaPago, CqlSession session) {

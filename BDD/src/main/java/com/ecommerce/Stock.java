@@ -14,7 +14,6 @@ import com.mongodb.client.FindIterable;
 import static com.mongodb.client.model.Filters.*;
 
 
-// PARTE 9 - CATALOGO DE PRODUCTOS
 public class Stock {
 
     private final MongoCollection<Document> coleccion;

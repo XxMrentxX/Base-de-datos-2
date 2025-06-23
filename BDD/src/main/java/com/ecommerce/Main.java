@@ -533,7 +533,6 @@ public class Main {
                                         double montoIva = subtotalDescontado * iva;
                                         double total = subtotalDescontado + montoIva;
 
-// Crear el ItemPedido
                                         UUID uuidProducto = UUID.fromString(producto.getString("id"));
 
                                         ItemPedido item = new ItemPedido(
@@ -548,7 +547,6 @@ public class Main {
                                                 total
                                         );
 
-// Agregar al carrito
                                         carrito.agregarItem(usuarioActual.getDni(), item);
 
                                     }

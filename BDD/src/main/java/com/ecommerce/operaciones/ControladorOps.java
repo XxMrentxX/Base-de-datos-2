@@ -5,7 +5,6 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// PARTE 7 - GUARDAR OPERACIONES DE FACTURACION/PAGOS
 public class ControladorOps {
     private static ControladorOps instancia;
 
@@ -18,7 +17,6 @@ public class ControladorOps {
         return instancia;
     }
 
-    // Registrar detalle de operación de pago
     public static void registrarOperacionPago(CqlSession session, UUID idPago, String medio, String operador, String estado) {
 
         UUID idOperacion = UUID.randomUUID();
@@ -35,7 +33,6 @@ public class ControladorOps {
         System.out.println("Operación registrada con ID: " + idOperacion);
     }
 
-    // Registrar detalles de facturación
     public static void registrarOperacionFacturacion(CqlSession session, UUID idFactura, String idPedido, String dni, String operador, String medio) {
         UUID idOperacion = UUID.randomUUID();
         String fechaHora = LocalDateTime.now().toString();

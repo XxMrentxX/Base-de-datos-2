@@ -23,7 +23,6 @@ public class PedidoService {
         return instancia;
     }
 
-    // PARTE 5 - CONVERTIR CARRITO A PEDIDO
     public String guardarPedido(Carrito carrito) {
         try {
             MongoDatabase dbMongo = PoolMongoDB.getInstancia().getConexion("pedidosDB");

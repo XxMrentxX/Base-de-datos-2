@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 public class Main {
     static {
-        // Silenciar MongoDB driver (usa java.util.logging)
         Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
         mongoLogger.setLevel(Level.SEVERE);
     }
@@ -45,7 +44,7 @@ public class Main {
         System.out.println("¡Bienvenido a nuestro E-Commerce!");
 
         boolean ejecutando = true;
-        boolean terminar = false; // TERMINA EL PROGRAMA ENTERO
+        boolean terminar = false; 
         boolean admin = false;
 
         while (ejecutando){
@@ -106,7 +105,7 @@ public class Main {
                             }
                         }
 
-                        scanner.nextLine(); // consume newline
+                        scanner.nextLine();
                         System.out.println("Ingrese la contraseña: ");
                         String password = scanner.nextLine();
 
@@ -305,7 +304,7 @@ public class Main {
                             System.out.println("1. Modificar imagen.");
                             System.out.println("2. Modificar video.");
                             subopcion = scanner.nextInt();
-                            scanner.nextLine(); // limpiar newline
+                            scanner.nextLine(); 
 
                             String campo = null;
                             String tipo = null;
@@ -668,11 +667,9 @@ public class Main {
 
                                     try (CqlSession session = CqlSession.builder().withKeyspace("ecommerce").withLocalDatacenter("datacenter1").build()) {
 
-                                        // generar las facturas por empresa y obtener el mapa con los montos
                                         Map<UUID, Double> facturasConMonto = Facturacion.generarFactura(idPedido, formaPago.getDescripcion(), session);
 
                                         if (!facturasConMonto.isEmpty()) {
-                                            //registrar el pago global por todas las facturas
                                             Pago.registrarPago(
                                                     session,
                                                     facturasConMonto,

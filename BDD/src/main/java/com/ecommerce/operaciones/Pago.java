@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-// PARTE 6 - REGISTRAR PAGO CON METODO
 public class Pago {
     private static Pago instancia;
 
